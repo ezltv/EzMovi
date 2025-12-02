@@ -1,5 +1,3 @@
-export const MY_LOCAL_PLAYLIST = `
-
 #EXTM3U
 #EXTINF:-1 tvg-logo="httpss://img.fullhdfilmizlesene.tv/poster/film/m3gan-20-71167.webp" tvg-year="2025" group-title="Aksiyon, Bilim Kurgu, Gerilim",M3GAN 2.0 - M3GAN 2.0
 https://movies.hdfilm.workers.dev/?ID=m3gan-20/
