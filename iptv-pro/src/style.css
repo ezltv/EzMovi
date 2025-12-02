@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* TV ve Yatay Ekran Ayarları */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #0f0f0f;
+    color: white;
+    overflow: hidden; /* Gereksiz kaydırmayı engelle */
+}
+/* ... Eski kodların altına ekle ... */
+
+/* DİKEY EKRAN UYARISI (Sadece Mobilde) */
+@media screen and (orientation: portrait) and (max-width: 768px) {
+  #app {
+    display: none;
+  }
+  
+  body::after {
+    content: "📺 Lütfen en iyi deneyim için cihazınızı YAN ÇEVİRİN.";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    font-size: 1.5rem;
+    z-index: 9999;
+  }
+}
