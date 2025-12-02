@@ -65,14 +65,6 @@ const handlePlay = (mediaInfo: any) => {
   isPlayerOpen.value = true
 }
 
-// Çıkış Yap
-const handleLogout = async () => {
-  if(confirm('EzMovi\'den çıkış yapılsın mı?')) {
-    await supabase.auth.signOut()
-    window.location.reload()
-  }
-}
-
 // Tam Ekran / TV Modu
 const toggleFullscreen = async () => {
   const elem = document.documentElement
