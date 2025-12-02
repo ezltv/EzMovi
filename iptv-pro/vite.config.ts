@@ -1,21 +1,20 @@
 import { defineConfig } from 'vite'
-import vue from '@vitejs/vue'
+import vue from '@vitejs/plugin-vue' // <-- DÜZELTİLEN SATIR (plugin-vue)
 import legacy from '@vitejs/plugin-legacy'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
-    // BURASI SİHİRLİ KISIM: Kodu eski tarayıcılar için dönüştürür
     legacy({
-      targets: ['defaults', 'not IE 11', 'chrome >= 52'], // LG WebOS Chrome 38-50 arası kullanır
+      targets: ['defaults', 'not IE 11', 'chrome >= 52'],
       additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
       renderLegacyChunks: true,
       polyfills: true
     })
   ],
   build: {
-    target: 'es2015', // Hedefi düşürdük
-    minify: 'terser', // Eski usül sıkıştırma
+    target: 'es2015',
+    minify: 'terser',
   }
 })
