@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { supabase } from '../supabase'
 import { Parser } from 'm3u8-parser'
+import { MY_LOCAL_PLAYLIST } from '../assets/localPlaylist' // <--- YENİ: Özel listeni buradan çekiyoruz
 
 const emit = defineEmits(['play'])
 
@@ -17,23 +18,36 @@ const selectedCategory = ref('Tümü')
 const categories = ref<string[]>(['Tümü'])
 const isMenuOpen = ref(false)
 
-// SABİT KULLANICI ID (Artık login yok, herkes admin)
+// SABİT KULLANICI ID
 const USER_ID = '11111111-1111-1111-1111-111111111111'
 
-// --- 1. Playlistleri Getir ---
+// --- 1. Playlistleri Getir (Gömülü + Veritabanı) ---
 const fetchPlaylists = async () => {
-  // admin-user'a ait listeleri çek
+  // A. Önce Veritabanındakileri Çek
   const { data } = await supabase
     .from('playlists')
     .select('*')
     .eq('user_id', USER_ID) 
     .order('created_at', { ascending: true })
 
+  // B. Gömülü Listeyi Manuel Oluştur
+  const localList = {
+    id: 9999, // Çakışmasın diye rastgele yüksek bir ID
+    name: '⭐ Özel Film Arşivi',
+    url: 'local', // URL yerine özel işaret
+    content: MY_LOCAL_PLAYLIST
+  }
+
+  // C. Hepsini Birleştir (Önce gömülü liste, sonra veritabanındakiler)
   if (data) {
-    playlists.value = data
-    if (!selectedPlaylistId.value && data.length > 0) {
-      selectPlaylist(data[0])
-    }
+    playlists.value = [localList, ...data]
+  } else {
+    playlists.value = [localList]
+  }
+
+  // Eğer seçim yoksa otomatik ilkini seç
+  if (!selectedPlaylistId.value && playlists.value.length > 0) {
+    selectPlaylist(playlists.value[0])
   }
 }
 
@@ -45,7 +59,7 @@ const addPlaylist = async () => {
   const name = newPlaylistName.value || `Liste ${playlists.value.length + 1}`
 
   const { error } = await supabase.from('playlists').insert({
-    user_id: USER_ID, // Sabit ID kullanıyoruz
+    user_id: USER_ID,
     url: newPlaylistUrl.value,
     name: name
   })
@@ -63,6 +77,12 @@ const addPlaylist = async () => {
 
 // --- 3. Playlist Sil ---
 const deletePlaylist = async (id: number) => {
+  // Gömülü listeyi silmeye çalışırsa engelle
+  if (id === 9999) {
+    alert('Bu özel arşiv silinemez!')
+    return
+  }
+
   if (!confirm('Silinsin mi?')) return
   await supabase.from('playlists').delete().eq('id', id)
   if (selectedPlaylistId.value === id) {
@@ -72,15 +92,24 @@ const deletePlaylist = async (id: number) => {
   await fetchPlaylists()
 }
 
-// --- 4. Playlist Seç ve Yükle ---
+// --- 4. Playlist Seç ve Yükle (GÜNCELLENDİ) ---
 const selectPlaylist = async (playlist: any) => {
   selectedPlaylistId.value = playlist.id
   loading.value = true
   isMenuOpen.value = false
   
   try {
-    const response = await fetch(playlist.url)
-    const text = await response.text()
+    let text = ''
+
+    // EĞER BU BİZİM GÖMÜLÜ LİSTEYSE
+    if (playlist.url === 'local') {
+      text = playlist.content // İnternete gitme, direkt içeriği al
+    } else {
+      // Değilse internetten çek
+      const response = await fetch(playlist.url)
+      text = await response.text()
+    }
+
     const parser = new Parser()
     parser.push(text)
     parser.end()
@@ -157,7 +186,7 @@ const filteredChannels = computed(() => {
           @click="selectPlaylist(pl)"
         >
           <span class="text-sm font-medium truncate">{{ pl.name }}</span>
-          <button @click.stop="deletePlaylist(pl.id)" class="text-gray-500 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100">🗑️</button>
+          <button v-if="pl.id !== 9999" @click.stop="deletePlaylist(pl.id)" class="text-gray-500 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100">🗑️</button>
         </div>
       </div>
     </div>
