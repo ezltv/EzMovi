@@ -18,7 +18,7 @@ const categories = ref<string[]>(['Tümü'])
 const isMenuOpen = ref(false)
 
 // SABİT KULLANICI ID (Artık login yok, herkes admin)
-const USER_ID = 'admin-user' 
+const USER_ID = '11111111-1111-1111-1111-111111111111'
 
 // --- 1. Playlistleri Getir ---
 const fetchPlaylists = async () => {
